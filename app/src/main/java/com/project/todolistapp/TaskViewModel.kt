@@ -1,44 +1,41 @@
 package com.project.todolistapp
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalTime
-import java.util.UUID
 
-class TaskViewModel: ViewModel() {
+class TaskViewModel(private val repository: TaskItemRepository): ViewModel() {
 
-    var taskItems = MutableLiveData<MutableList<TaskItem>>()
 
-    init {
-        taskItems.value = mutableListOf()
+    var taskItems : LiveData<List<TaskItem>> = repository.allTaskItems.asLiveData()
+
+    fun addTaskItem(newTask : TaskItem) = viewModelScope.launch{
+        repository.insertTaskItem(newTask)
     }
 
-    fun addTaskItem(newTask : TaskItem){
-        val list = taskItems.value
-        list!!.add(newTask)
-        taskItems.postValue(list)
+    fun updateTaskItem(taskItem: TaskItem) = viewModelScope.launch{
+        repository.updateTaskItem(taskItem)
+
     }
 
-    fun updateTaskItem(id: UUID, name: String, desc:String, dueTime: LocalTime?){
-        val list = taskItems.value
-        val task = list!!.find{it.id == id}!!
-        task.name = name
-        task.desc = desc
-        task.dueTime = dueTime
-
-        taskItems.postValue(list)
-    }
-
-    fun setCompleted(taskItem : TaskItem){
-        val list = taskItems.value
-        val task = list!!.find{it.id == taskItem.id}!!
-        if(task.completedDate == null){
-            task.completedDate = LocalDate.now()
+    fun setCompleted(taskItem: TaskItem) = viewModelScope.launch {
+        if(!taskItem.isCompleted()){
+            taskItem.completedDateString = TaskItem.dateFormatter.format(LocalDate.now())
         }
-        taskItems.postValue(list)
+        repository.updateTaskItem(taskItem)
     }
+}
 
+class TaskItemModelFactory(private val repository: TaskItemRepository) : ViewModelProvider.Factory {
+
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if(modelClass.isAssignableFrom(TaskViewModel::class.java))
+            return TaskViewModel(repository) as T
+
+        throw IllegalArgumentException("Unknown Class")
+    }
 }

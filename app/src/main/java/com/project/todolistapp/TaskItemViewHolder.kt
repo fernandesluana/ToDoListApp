@@ -39,8 +39,8 @@ class TaskItemViewHolder(
             }
 
 
-            if(taskItem.dueTime != null) {
-                binding.dueTime.text = timeFormat.format(taskItem.dueTime)
+            if(taskItem.dueTime() != null) {
+                binding.dueTime.text = timeFormat.format(taskItem.dueTime())
             } else {
                 binding.dueTime.text = ""
             }

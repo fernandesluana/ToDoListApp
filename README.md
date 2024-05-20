@@ -27,7 +27,6 @@ Clone this repository
 ```
 Or downladoad as a zip and extract the project.
 
-
-    - Open project in Android Studio
-    - Wait while Android Studio Downloads gradle or required files
-    - Hit Run Button !
+- Open project in Android Studio
+- Wait while Android Studio Downloads gradle or required files
+- Hit Run Button !
